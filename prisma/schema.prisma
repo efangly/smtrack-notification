@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Notifications {
+  id       String   @id @default(uuid())
+  serial   String
+  message  String
+  detail   String
+  status   Boolean  @default(false)
+  device   Devices  @relation(fields: [serial], references: [serial])
+  createAt DateTime @default(now())
+  updateAt DateTime @default(now()) @updatedAt
+}
+
+model Devices {
+  id           String          @id @default(uuid())
+  serial       String          @unique
+  ward         String
+  hospital     String
+  staticName   String
+  name         String?
+  status       Boolean
+  seq          Int
+  firmware     String
+  remark       String?
+  notification Notifications[]
+  createAt     DateTime
+  updateAt     DateTime
+}
