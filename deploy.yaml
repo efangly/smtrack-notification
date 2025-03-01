@@ -22,8 +22,8 @@ spec:
             path: /health
             port: 3000
           initialDelaySeconds: 15
-          periodSeconds: 15
-          timeoutSeconds: 5
+          periodSeconds: 30
+          timeoutSeconds: 15
           successThreshold: 1
           failureThreshold: 5
         livenessProbe:
@@ -31,8 +31,8 @@ spec:
             path: /health
             port: 3000
           initialDelaySeconds: 15
-          periodSeconds: 15
-          timeoutSeconds: 5
+          periodSeconds: 30
+          timeoutSeconds: 15
           failureThreshold: 5
         resources:
           requests:

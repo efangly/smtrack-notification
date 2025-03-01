@@ -8,7 +8,7 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
   private readonly logger = new Logger(AppController.name);
 
-  @EventPattern('notification') // Routing key
+  @EventPattern('notification')
   async handleMessage(@Payload() data: CreateLogDto, @Ctx() context: RmqContext) {
     const channel = context.getChannelRef();
     const message = context.getMessage();
