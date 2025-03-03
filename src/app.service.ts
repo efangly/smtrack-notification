@@ -9,11 +9,11 @@ import { SocketService } from './socket/socket.service';
 @Injectable()
 export class AppService {
   constructor(
-    private readonly prisma: PrismaService, 
+    private readonly prisma: PrismaService,
     private readonly influxdb: InfluxdbService,
     private readonly firebase: FirebaseService,
     private readonly socket: SocketService
-  ) {}
+  ) { }
   async createLogDays(message: CreateLogDto) {
     message.createAt = dateFormat(new Date());
     message.updateAt = dateFormat(new Date());
@@ -21,8 +21,26 @@ export class AppService {
     const tags = { sn: message.serial };
     const fields = { message: message.detail };
     await this.influxdb.writeData('notification', fields, tags);
-    await this.firebase.pushNotification('admin', log.device.name, log.detail);
-    this.socket.socket.emit('send_message',  {
+    if (log.device.hospital === 'HID-DEVELOPMENT') {
+      if (log.message.split("/")[1].substring(0, 4) === 'DOOR') {
+        await this.firebase.pushNotification('admin-door', log.device.name, log.detail);
+      } else {
+        await this.firebase.pushNotification('admin', log.device.name, log.detail);
+      }
+    } else {
+      if (log.message.split("/")[1].substring(0, 4) === 'DOOR') {
+        await this.firebase.pushNotification('admin-door', log.device.name, log.detail);
+        await this.firebase.pushNotification('service-door', log.device.name, log.detail);
+        await this.firebase.pushNotification(`${log.device.ward}-door`, log.device.name, log.detail);
+        await this.firebase.pushNotification(`${log.device.hospital}-door`, log.device.name, log.detail);
+      } else {
+        await this.firebase.pushNotification('admin', log.device.name, log.detail);
+        await this.firebase.pushNotification('service', log.device.name, log.detail);
+        await this.firebase.pushNotification(log.device.ward, log.device.name, log.detail);
+        await this.firebase.pushNotification(log.device.hospital, log.device.name, log.detail);
+      }
+    }
+    this.socket.emit('send_message', {
       device: log.device.name,
       message: log.detail,
       hospital: log.device.hospital,

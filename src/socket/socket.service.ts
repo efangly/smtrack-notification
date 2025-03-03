@@ -13,4 +13,8 @@ export class SocketService implements OnModuleInit {
     this.socket = io(process.env.BROKER);
     return this.socket;
   }
+
+  emit(event: string, data: any) {
+    this.socket.emit(event, data);
+  }
 }

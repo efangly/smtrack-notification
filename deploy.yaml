@@ -74,6 +74,11 @@ spec:
             configMapKeyRef:
               name: influxdb-config
               key: INFLUXDB_TOKEN
+        - name: BROKER
+          valueFrom:
+            configMapKeyRef:
+              name: log-config
+              key: BROKER
         - name: NODE_ENV
           valueFrom:
             configMapKeyRef:
