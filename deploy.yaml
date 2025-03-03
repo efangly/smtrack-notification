@@ -4,7 +4,7 @@ metadata:
   name: insert-notification
   namespace: smtrack
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: insert-notification
@@ -13,6 +13,8 @@ spec:
       labels:
         app: insert-notification
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: siamatic
       containers:
       - name: insert-notification
         image: siamatic/smtrack-insert-notification:latest

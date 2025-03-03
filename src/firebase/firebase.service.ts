@@ -1,10 +1,11 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { credential } from "firebase-admin";
 import { initializeApp } from 'firebase-admin/app';
 import { getMessaging, Message } from "firebase-admin/messaging";
 
 @Injectable()
 export class FirebaseService implements OnModuleInit {
+  private readonly logger = new Logger(FirebaseService.name);
   onModuleInit() {
     initializeApp({
       credential: credential.cert(require('../../temp-alarm-firebase-adminsdk.json')),
@@ -38,7 +39,7 @@ export class FirebaseService implements OnModuleInit {
       };
       await getMessaging().send(message);
     } catch (error) {
-      console.error('Error sending message:', error);
+      this.logger.error(error);
       throw error;
     }
   };
