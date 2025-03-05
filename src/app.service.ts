@@ -1,14 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { PrismaService } from './prisma/prisma.service';
 import { InfluxdbService } from './influxdb/influxdb.service';
 import { CreateLogDto } from './dto/insert.dto';
 import { dateFormat } from './utils/date-format';
 import { FirebaseService } from './firebase/firebase.service';
 import { SocketService } from './socket/socket.service';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class AppService {
   constructor(
+    @Inject('RABBITMQ_SERVICE') private readonly client: ClientProxy,
     private readonly prisma: PrismaService,
     private readonly influxdb: InfluxdbService,
     private readonly firebase: FirebaseService,
@@ -40,6 +42,16 @@ export class AppService {
         await this.firebase.pushNotification(log.device.hospital, log.device.name, log.detail);
       }
     }
+    this.client.emit('notification-backup', {
+      id: log.id,
+      serial: log.serial,
+      staticName: log.device.staticName,
+      message: log.message,
+      detail: log.detail,
+      status: log.status,
+      createAt: log.createAt,
+      updateAt: log.updateAt
+    });
     this.socket.emit('send_message', {
       device: log.device.name,
       message: log.detail,
