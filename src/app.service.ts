@@ -20,7 +20,7 @@ export class AppService {
     message.createAt = dateFormat(new Date());
     message.updateAt = dateFormat(new Date());
     const log = await this.prisma.notifications.create({ data: message, include: { device: true } });
-    const tags = { sn: message.serial };
+    const tags = { sn: message.serial, static: log.device.staticName, hospital: log.device.hospital, ward: log.device.ward };
     const fields = { message: message.detail };
     await this.influxdb.writeData('notification', fields, tags);
     if (log.device.hospital === 'HID-DEVELOPMENT') {
