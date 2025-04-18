@@ -16,6 +16,8 @@ jobs:
     - name: Create service account key file
       run: |
         echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" | base64 -d > ./temp-alarm-firebase-adminsdk.json
+        cat firebase-key.json
+        cat firebase-key.json | jq
     - name: Login to docker hub
       uses: docker/login-action@v3
       with:
