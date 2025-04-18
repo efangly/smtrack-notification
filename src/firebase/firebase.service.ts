@@ -9,7 +9,7 @@ export class FirebaseService implements OnModuleInit {
   onModuleInit() {
     initializeApp({
       credential: credential.cert(require('../../temp-alarm-firebase-adminsdk.json')),
-      projectId: 'temp-alarm',
+      projectId: 'smtemp-f7de5',
     });
   }
 

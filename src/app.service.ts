@@ -21,7 +21,7 @@ export class AppService {
     message.updateAt = dateFormat(new Date());
     const log = await this.prisma.notifications.create({ data: message, include: { device: true } });
     const tags = { sn: message.serial, static: log.device.staticName, hospital: log.device.hospital, ward: log.device.ward };
-    const fields = { message: message.detail };
+    const fields = { message: message.message };
     await this.influxdb.writeData('notification', fields, tags);
     if (log.device.hospital === 'HID-DEVELOPMENT') {
       if (log.message.split("/")[1].substring(0, 4) === 'DOOR') {
