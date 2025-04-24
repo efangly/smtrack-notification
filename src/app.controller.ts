@@ -1,7 +1,7 @@
 import { Controller, Logger } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
-import { CreateLogDto } from './dto/insert.dto';
+import { CreateNotificationDto } from './dto/insert.dto';
 
 @Controller()
 export class AppController {
@@ -9,11 +9,11 @@ export class AppController {
   private readonly logger = new Logger(AppController.name);
 
   @EventPattern('notification')
-  async handleMessage(@Payload() data: CreateLogDto, @Ctx() context: RmqContext) {
+  async handleMessage(@Payload() data: CreateNotificationDto, @Ctx() context: RmqContext) {
     const channel = context.getChannelRef();
     const message = context.getMessage();
     try {
-      await this.appService.createLogDays(data);
+      await this.appService.createNotification(data);
       channel.ack(message);
     } catch (error) {
       this.logger.error(error);

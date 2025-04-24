@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { PrismaService } from './prisma/prisma.service';
 import { InfluxdbService } from './influxdb/influxdb.service';
-import { CreateLogDto } from './dto/insert.dto';
+import { CreateNotificationDto } from './dto/insert.dto';
 import { dateFormat } from './utils/date-format';
 import { FirebaseService } from './firebase/firebase.service';
 import { SocketService } from './socket/socket.service';
@@ -15,49 +15,50 @@ export class AppService {
     private readonly influxdb: InfluxdbService,
     private readonly firebase: FirebaseService,
     private readonly socket: SocketService
-  ) { }
-  async createLogDays(message: CreateLogDto) {
+  ) {}
+
+  async createNotification(message: CreateNotificationDto) {
     message.createAt = dateFormat(new Date());
     message.updateAt = dateFormat(new Date());
-    const log = await this.prisma.notifications.create({ data: message, include: { device: true } });
-    const tags = { sn: message.serial, static: log.device.staticName, hospital: log.device.hospital, ward: log.device.ward };
+    const notification = await this.prisma.notifications.create({ data: message, include: { device: true } });
+    const tags = { sn: message.serial, static: notification.device.staticName, hospital: notification.device.hospital, ward: notification.device.ward };
     const fields = { message: message.message };
     await this.influxdb.writeData('notification', fields, tags);
-    if (log.device.hospital === 'HID-DEVELOPMENT') {
-      if (log.message.split("/")[1].substring(0, 4) === 'DOOR') {
-        await this.firebase.pushNotification('admin-door', log.device.name, log.detail);
+    if (notification.device.hospital === 'HID-DEVELOPMENT') {
+      if (notification.message.split("/")[1].substring(0, 4) === 'DOOR') {
+        await this.firebase.pushNotification('admin-door', notification.device.name, notification.detail);
       } else {
-        await this.firebase.pushNotification('admin', log.device.name, log.detail);
+        await this.firebase.pushNotification('admin', notification.device.name, notification.detail);
       }
     } else {
-      if (log.message.split("/")[1].substring(0, 4) === 'DOOR') {
-        await this.firebase.pushNotification('admin-door', log.device.name, log.detail);
-        await this.firebase.pushNotification('service-door', log.device.name, log.detail);
-        await this.firebase.pushNotification(`${log.device.ward}-door`, log.device.name, log.detail);
-        await this.firebase.pushNotification(`${log.device.hospital}-door`, log.device.name, log.detail);
+      if (notification.message.split("/")[1].substring(0, 4) === 'DOOR') {
+        await this.firebase.pushNotification('admin-door', notification.device.name, notification.detail);
+        await this.firebase.pushNotification('service-door', notification.device.name, notification.detail);
+        await this.firebase.pushNotification(`${notification.device.ward}-door`, notification.device.name, notification.detail);
+        await this.firebase.pushNotification(`${notification.device.hospital}-door`, notification.device.name, notification.detail);
       } else {
-        await this.firebase.pushNotification('admin', log.device.name, log.detail);
-        await this.firebase.pushNotification('service', log.device.name, log.detail);
-        await this.firebase.pushNotification(log.device.ward, log.device.name, log.detail);
-        await this.firebase.pushNotification(log.device.hospital, log.device.name, log.detail);
+        await this.firebase.pushNotification('admin', notification.device.name, notification.detail);
+        await this.firebase.pushNotification('service', notification.device.name, notification.detail);
+        await this.firebase.pushNotification(notification.device.ward, notification.device.name, notification.detail);
+        await this.firebase.pushNotification(notification.device.hospital, notification.device.name, notification.detail);
       }
     }
     this.client.emit('notification-backup', {
-      id: log.id,
-      serial: log.serial,
-      staticName: log.device.staticName,
-      message: log.message,
-      detail: log.detail,
-      status: log.status,
-      createAt: log.createAt,
-      updateAt: log.updateAt
+      id: notification.id,
+      serial: notification.serial,
+      staticName: notification.device.staticName,
+      message: notification.message,
+      detail: notification.detail,
+      status: notification.status,
+      createAt: notification.createAt,
+      updateAt: notification.updateAt
     });
     this.socket.emit('send_message', {
-      device: log.device.name,
-      message: log.detail,
-      hospital: log.device.hospital,
-      wardName: log.device.ward,
-      time: log.createAt.toString()
+      device: notification.device.name,
+      message: notification.detail,
+      hospital: notification.device.hospital,
+      wardName: notification.device.ward,
+      time: notification.createAt.toString()
     });
   }
 }

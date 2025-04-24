@@ -1,6 +1,6 @@
 import { IsString, IsBoolean, MaxLength, IsOptional, IsDate } from 'class-validator';
 
-export class CreateLogDto {
+export class CreateNotificationDto {
   @IsOptional()
   @IsString()
   @MaxLength(100)
