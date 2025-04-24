@@ -17,7 +17,7 @@ spec:
         kubernetes.io/hostname: siamatic
       containers:
       - name: insert-notification
-        image: siamatic/smtrack-insert-notification:1.0.2
+        image: siamatic/smtrack-insert-notification:1.0.3
         readinessProbe:
           httpGet:
             path: /health
