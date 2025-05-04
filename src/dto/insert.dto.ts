@@ -4,7 +4,7 @@ export class CreateNotificationDto {
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  id: string;
+  id?: string;
 
   @IsOptional()
   @IsString()
@@ -23,7 +23,7 @@ export class CreateNotificationDto {
 
   @IsOptional()
   @IsBoolean()
-  status: boolean;
+  status?: boolean;
 
   @IsDate()
   @IsOptional()

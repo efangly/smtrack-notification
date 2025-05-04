@@ -6,6 +6,10 @@ import { dateFormat } from './utils/date-format';
 import { FirebaseService } from './firebase/firebase.service';
 import { SocketService } from './socket/socket.service';
 import { ClientProxy } from '@nestjs/microservices';
+import { Cron } from '@nestjs/schedule';
+import axios from 'axios';
+import { format } from 'date-fns';
+import { Probe } from './types/probe.type';
 
 @Injectable()
 export class AppService {
@@ -59,6 +63,43 @@ export class AppService {
       hospital: notification.device.hospital,
       wardName: notification.device.ward,
       time: notification.createAt.toString()
+    });
+  }
+
+  @Cron('*/10 * * * *')
+  async handleCron() {
+    const result = await axios.get(process.env.DEVICE_URL);
+    const data = result.data.data as Probe[];
+    if (data.length === 0) return;
+    const device = data.filter((device) => device.firstDay === "ALL"
+      || device.firstDay === format(new Date(), "eee").toUpperCase()
+      || device.secondDay === format(new Date(), "eee").toUpperCase()
+      || device.thirdDay === format(new Date(), "eee").toUpperCase()
+    )
+    if (device.length === 0) return;
+    const sendTime = device.filter((device) => device.firstTime === format(new Date(), "HHmm")
+      || device.secondTime === format(new Date(), "HHmm")
+      || device.thirdTime === format(new Date(), "HHmm")
+    );
+    if (sendTime.length === 0) return;
+    sendTime.forEach((device) => {
+      if (device.device.log.length > 0) {
+        this.createNotification({
+          serial: device.device.id,
+          message: `REPORT/TEMP ${device.device.log[0].tempDisplay} C, HUMI ${device.device.log[0].humidityDisplay}%`,
+          detail: `Report: TEMP ${device.device.log[0].tempDisplay} C, HUMI ${device.device.log[0].humidityDisplay}%`,
+          createAt: dateFormat(new Date()),
+          updateAt: dateFormat(new Date())
+        });
+      } else {
+        this.createNotification({
+          serial: device.device.id,
+          message: `REPORT/Can't get Temp. and Humi.`,
+          detail: `Report: Can't get Temp. and Humi.`,
+          createAt: dateFormat(new Date()),
+          updateAt: dateFormat(new Date())
+        });
+      }
     });
   }
 }

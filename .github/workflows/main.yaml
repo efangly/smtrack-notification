@@ -10,7 +10,7 @@ jobs:
 
     runs-on: ubuntu-latest
     env:
-      IMAGE_NAME: siamatic/smtrack-insert-notification:1.0.3
+      IMAGE_NAME: siamatic/smtrack-insert-notification:1.0.4
     steps:
     - uses: actions/checkout@v4
     - name: Create service account key file

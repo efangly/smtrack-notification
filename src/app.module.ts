@@ -8,10 +8,12 @@ import { FirebaseModule } from './firebase/firebase.module';
 import { ConfigModule } from '@nestjs/config';
 import { SocketModule } from './socket/socket.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
     PrismaModule,
     InfluxdbModule,
     HealthModule,
@@ -27,7 +29,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
           queueOptions: { durable: true }
         }
       }
-    ])
+    ]),
   ],
   controllers: [AppController],
   providers: [AppService],

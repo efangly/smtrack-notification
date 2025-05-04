@@ -48,6 +48,11 @@ spec:
             configMapKeyRef:
               name: log-config
               key: DATABASE_URL
+        - name: DEVICE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: log-config
+              key: DEVICE_URL
         - name: RABBITMQ
           valueFrom:
             configMapKeyRef:
