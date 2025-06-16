@@ -1,17 +1,12 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
-import { credential } from "firebase-admin";
-import { initializeApp } from 'firebase-admin/app';
+import { Injectable, Logger, Inject } from '@nestjs/common';
+import { FCM_LEGACY, FCM_NEW } from './firebase.providers';
+import { App } from 'firebase-admin/app';
 import { getMessaging, Message } from "firebase-admin/messaging";
 
 @Injectable()
-export class FirebaseService implements OnModuleInit {
+export class FirebaseService {
+  constructor(@Inject(FCM_LEGACY) private readonly legacyApp: App, @Inject(FCM_NEW) private readonly newApp: App) {}
   private readonly logger = new Logger(FirebaseService.name);
-  onModuleInit() {
-    initializeApp({
-      credential: credential.cert(require('../../temp-alarm-firebase-adminsdk.json')),
-      projectId: 'smtemp-f7de5',
-    });
-  }
 
   async pushNotification(topic: string, title: string, detail: string) {
     try {
@@ -37,7 +32,9 @@ export class FirebaseService implements OnModuleInit {
         },
         topic: topic
       };
-      await getMessaging().send(message);
+      await getMessaging(this.legacyApp).send(message);
+      this.logger.log('test');
+      await getMessaging(this.newApp).send(message);
     } catch (error) {
       this.logger.error(error);
       throw error;
