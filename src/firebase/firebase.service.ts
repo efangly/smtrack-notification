@@ -33,7 +33,6 @@ export class FirebaseService {
         topic: topic
       };
       await getMessaging(this.legacyApp).send(message);
-      this.logger.log('test');
       await getMessaging(this.newApp).send(message);
     } catch (error) {
       this.logger.error(error);
