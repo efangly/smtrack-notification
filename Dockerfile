@@ -8,6 +8,8 @@ COPY package*.json ./
 
 COPY temp-alarm-firebase-adminsdk.json ./
 
+COPY sm-monitoring-firebase-adminsdk.json ./
+
 RUN npm install
 
 COPY . .
@@ -25,6 +27,8 @@ RUN apk add --no-cache openssl
 COPY --from=build /app/package*.json ./
 
 COPY --from=build /app/temp-alarm-firebase-adminsdk.json ./
+
+COPY --from=build /app/sm-monitoring-firebase-adminsdk.json ./
 
 COPY --from=build /app/dist ./dist
 
